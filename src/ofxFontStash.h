@@ -31,6 +31,7 @@
  THE SOFTWARE.
  */
 
+
 #ifndef ofxFontStash_h
 #define ofxFontStash_h
 
@@ -41,9 +42,14 @@
 #include "ofTextConverter.h"
 
 extern "C" {
-	#include "fontstash.h"
+#include "fontstash.h"
+#include <GLFW/glfw3.h>             // Or any other GL header of your choice.
+#include "glfontstash.h"
 }
 
+#define FS_FONT_REGULAR 0
+#define FS_FONT_ITALIC 1
+#define FS_FONT_BOLD 2
 
 class ofxFontStash{
 
@@ -73,21 +79,31 @@ class ofxFontStash{
 		ofRectangle getBBox( string text, float size, float x, float y );
 		ofRectangle getBBox( string text, float size, float x, float y, float columnWidth );
 
+        // new
+        bool addFontVarient(string fontFile, int varient);
 
 		//interleave drawBatch* calls between begin() and end()
-		void beginBatch();
-		void drawBatch( string text, float size, float x, float y);
-		void drawMultiLineBatch( string text, float size, float x, float y );
-		void endBatch();
+		//void beginBatch();
+		//void drawBatch( string text, float size, float x, float y);
+		//void drawMultiLineBatch( string text, float size, float x, float y );
+		//void endBatch();
 
 		void setLineHeight(float percent);
-
-	private:
+        void setColor(ofColor color);
+	
+private:
 		
 		float				lineHeight; // as percent, 1.0 would be normal
-		struct sth_stash*	stash;
-		int					stashFontID;
-		bool				batchDrawing;
+		//struct sth_stash*	stash;
+        struct FONScontext* stash;
+
+        int					regularFontID;
+        int					italicFontID;
+        int					boldFontID;
+
+
+        //bool				batchDrawing;
+        unsigned int        color;
 
 		//fill in a string
 		string walkAndFill(ofUTF8Ptr being, ofUTF8Ptr & iter, ofUTF8Ptr end);

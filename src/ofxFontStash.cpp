@@ -32,6 +32,10 @@
 
 
 #include <iostream>
+#define FONTSTASH_IMPLEMENTATION
+#define GLFONTSTASH_IMPLEMENTATION  // Expands implementation
+
+
 #include "ofxFontStash.h"
 
 std::string searchAndReplace(std::string &s,
@@ -45,17 +49,31 @@ std::string searchAndReplace(std::string &s,
     return(s.replace(s.find(toReplace), toReplace.length(), replaceWith));
 }
 
+unsigned int gltohex(float *c)
+{
+    
+    int r = (int)(c[0]*255);
+    int g = (int)(c[1]*255);
+    int b = (int)(c[2]*255);
+    int a = (int)(c[3]*255);
+    
+    return ((r & 0xff) << 24) + ((g & 0xff) << 16) + ((b & 0xff) << 8) + (a & 0xff);
+    
+}
+
 /* *********************************************************************** */
 
 ofxFontStash::ofxFontStash(){
-	stashFontID = 0;
+	regularFontID = 0;
+    italicFontID = 0;
+    boldFontID = 0;
 	lineHeight = 1.0f;
 	stash = NULL;
-	batchDrawing = false;
+	//batchDrawing = false;
 }
 
 ofxFontStash::~ofxFontStash(){
-	if(stash != NULL) sth_delete(stash);
+	if(stash != NULL) glfonsDelete(stash);
 }
 
 bool ofxFontStash::setup( string fontFile, float lineHeightPercent , int texDimension /*has to be powerfOfTwo!*/){
@@ -63,9 +81,9 @@ bool ofxFontStash::setup( string fontFile, float lineHeightPercent , int texDime
 	if (stash == NULL){
 		lineHeight = lineHeightPercent;
 		texDimension = ofNextPow2(texDimension);
-		stash = sth_create(texDimension,texDimension);
-		stashFontID = sth_add_font( stash, ofToDataPath( fontFile ).c_str() );
-		if ( stashFontID != 0){
+		stash = glfonsCreate(texDimension,texDimension,FONS_ZERO_TOPLEFT);
+		regularFontID = fonsAddFont( stash, "regular", ofToDataPath( fontFile ).c_str() );
+        if ( regularFontID != 0){
 			ofLogNotice("ofxFontStash", "loaded font '%s' in texture (%d x %d)", fontFile.c_str(), texDimension, texDimension );
 			return true;
 		}else{
@@ -85,14 +103,22 @@ void ofxFontStash::draw( string text, float size, float x, float y){
 		
 		glPushMatrix();
 		glTranslatef(x, y, 0.0);
-		sth_begin_draw(stash);
-		sth_draw_text( stash, stashFontID, size, 0, 0 , text.c_str(), &dx ); //this might draw
-		sth_end_draw(stash); // this actually draws
+
+        // old stuff
+        //		sth_begin_draw(stash);
+        //		sth_draw_text( stash, stashFontID, size, 0, 0 , text.c_str(), &dx ); //this might draw
+        //		sth_end_draw(stash); // this actually draws
+        
+        // new stuff
+        fonsSetSize(stash, size);
+        fonsDrawText(stash, 0, 0, text.c_str(), NULL);
+        
 		glPopMatrix();
 	}else{
 		ofLogError("ofxFontStash", "can't draw() without having been setup first!");
 	}		
 }
+
 
 void ofxFontStash::drawMultiLine( string text, float size, float x, float y){
 	
@@ -100,18 +126,29 @@ void ofxFontStash::drawMultiLine( string text, float size, float x, float y){
 
 		glPushMatrix();
 			glTranslatef(x, y, 0.0f);
-			sth_begin_draw(stash);
-			
+            //	sth_begin_draw(stash);
+            fonsSetSize(stash, size);
+        
+            float currentColor[4];
+            glGetFloatv(GL_CURRENT_COLOR,currentColor);
+        
+            fonsSetColor(stash, gltohex(currentColor));
+        
 			stringstream ss(text);
 			string s;
 			int line = 0;
 			while ( getline(ss, s, '\n') ) {
 				//cout << s << endl;
 				float dx = 0;
-				sth_draw_text( stash, stashFontID, size, 0.0f, size * lineHeight * OFX_FONT_STASH_LINE_HEIGHT_MULT * line, s.c_str(), &dx );
+                // old fs
+                //		sth_draw_text( stash, stashFontID, size, 0.0f, size * lineHeight * OFX_FONT_STASH_LINE_HEIGHT_MULT * line, s.c_str(), &dx );
+            
+                // new fs
+                fonsDrawText(stash, 0, size * lineHeight * OFX_FONT_STASH_LINE_HEIGHT_MULT * line, s.c_str(), NULL);
 				line ++;
-			}
-			sth_end_draw(stash);
+			
+            }
+		//	sth_end_draw(stash);
 		glPopMatrix();
 
 	}else{
@@ -199,7 +236,7 @@ ofRectangle ofxFontStash::drawMultiLineColumn( string & text, float size, float 
 			}
         }
 
-		if(!dontDraw) beginBatch();
+		//if(!dontDraw) beginBatch();
 		numLines = splitLines.size();
 		int linesToDraw = 0;
 		if (maxLines > 0 ){
@@ -212,7 +249,8 @@ ofRectangle ofxFontStash::drawMultiLineColumn( string & text, float size, float 
 			if(!dontDraw){
 				ofPushMatrix();
 				ofTranslate(0, yy);
-				drawBatch(splitLines[i], size, 0, 0 );
+		//		drawBatch(splitLines[i], size, 0, 0 );
+                draw(splitLines[i], size, 0, 0 );
 				ofPopMatrix();
 			}
 			#if OF_VERSION_MAJOR == 0 && OF_VERSION_MINOR == 8
@@ -222,7 +260,7 @@ ofRectangle ofxFontStash::drawMultiLineColumn( string & text, float size, float 
 			#endif
 		}
 		if(!dontDraw){
-			endBatch();
+		//	endBatch();
 			glPopMatrix();
 		}
 
@@ -241,57 +279,70 @@ ofRectangle ofxFontStash::drawMultiLineColumn( string & text, float size, float 
 	return totalArea;
 }
 
-void ofxFontStash::beginBatch(){
-	if(stash != NULL){
-		batchDrawing = TRUE;
-		sth_begin_draw(stash);
-	}
-}
-
-void ofxFontStash::endBatch(){
-	if(stash != NULL){
-		batchDrawing = FALSE;
-		sth_end_draw(stash);
-	}
-}
-
-void ofxFontStash::drawBatch( string text, float size, float x, float y){
-	if (stash != NULL){
-		if(batchDrawing){
-			float dx = 0;
-			sth_begin_draw(stash);
-			sth_draw_text( stash, stashFontID, size, x, y, text.c_str(), &dx ); //this might draw
-			sth_end_draw(stash); // this actually draws
-		}else{
-			ofLogError("ofxFontStash", "can't drawBatch() without calling beginBatch() first!");
-		}
-	}else{
-		ofLogError("ofxFontStash", "can't drawBatch() without having been setup first!");
-	}
-}
-
-
-void ofxFontStash::drawMultiLineBatch( string text, float size, float x, float y ){
-	if (stash != NULL){
-		if(batchDrawing){
-			float dx = 0;
-			stringstream ss(text);
-			string s;
-			int line = 0;
-			while ( getline(ss, s, '\n') ) {
-				//cout << s << endl;
-				float dx = 0;
-				sth_draw_text( stash, stashFontID, size, 0.0f, size * lineHeight * OFX_FONT_STASH_LINE_HEIGHT_MULT * line, s.c_str(), &dx );
-				line ++;
-			}
-		}else{
-			ofLogError("ofxFontStash", "can't drawMultiLineBatch() without calling beginBatch() first!");
-		}
-	}else{
-		ofLogError("ofxFontStash", "can't drawMultiLineBatch() without having been setup first!");
-	}
-
-}
+//void ofxFontStash::beginBatch(){
+//	if(stash != NULL){
+//		batchDrawing = TRUE;
+//		//sth_begin_draw(stash);
+//	}
+//}
+//
+//void ofxFontStash::endBatch(){
+//	if(stash != NULL){
+//		batchDrawing = FALSE;
+//		//sth_end_draw(stash);
+//	}
+//}
+//
+//void ofxFontStash::drawBatch( string text, float size, float x, float y){
+//	if (stash != NULL){
+//		if(batchDrawing){
+//			float dx = 0;
+//            
+//            // old stuff - It looks like the begin/end paradigm is gone from new fs
+//            // for now this just draws each for the sake of compatibility
+//            
+//            //	sth_begin_draw(stash);
+//            //	sth_draw_text( stash, stashFontID, size, x, y, text.c_str(), &dx ); //this might draw
+//            //	sth_end_draw(stash); // this actually draws
+//            
+//            fonsSetSize(stash, size);
+//            fonsDrawText(stash, x, y, text.c_str(), NULL);
+//            
+//            
+//		}else{
+//			ofLogError("ofxFontStash", "can't drawBatch() without calling beginBatch() first!");
+//		}
+//	}else{
+//		ofLogError("ofxFontStash", "can't drawBatch() without having been setup first!");
+//	}
+//}
+//
+//
+//void ofxFontStash::drawMultiLineBatch( string text, float size, float x, float y ){
+//	if (stash != NULL){
+//		if(batchDrawing){
+//			float dx = 0;
+//			stringstream ss(text);
+//			string s;
+//			int line = 0;
+//			while ( getline(ss, s, '\n') ) {
+//				//cout << s << endl;
+//				float dx = 0;
+//		//		sth_draw_text( stash, stashFontID, size, 0.0f, size * lineHeight * OFX_FONT_STASH_LINE_HEIGHT_MULT * line, s.c_str(), &dx );
+//                fonsSetSize(stash, size);
+//                fonsDrawText(stash, 0.0f, size * lineHeight * OFX_FONT_STASH_LINE_HEIGHT_MULT * line, s.c_str(), NULL);
+//
+//                
+//				line ++;
+//			}
+//		}else{
+//			ofLogError("ofxFontStash", "can't drawMultiLineBatch() without calling beginBatch() first!");
+//		}
+//	}else{
+//		ofLogError("ofxFontStash", "can't drawMultiLineBatch() without having been setup first!");
+//	}
+//
+//}
 
 string ofxFontStash::walkAndFill(ofUTF8Ptr begin, ofUTF8Ptr & iter, ofUTF8Ptr end){
 
@@ -319,19 +370,29 @@ ofRectangle ofxFontStash::getBBox( string text, float size, float xx, float yy )
 		while ( getline(ss, s, '\n') ) {
 			float dx = 0;
 			float w, h, x, y;
-			sth_dim_text( stash, stashFontID, size, s.c_str(), &x, &y, &w, &h);
-			r.x = x + xx;
-			r.y = yy + y ;
-			w = fabs (w - x);
-			h = fabs(y - h);
-			if(w > r.width) r.width = w;
-			if(h > r.height) r.height = h;
-			ofRectangle r2 = r;
+            
+			//sth_dim_text( stash, stashFontID, size, s.c_str(), &x, &y, &w, &h);
+            
+            float bounds[4];
+            fonsSetSize(stash, size);
+            fonsTextBounds(stash, xx, yy, s.c_str(), NULL, bounds);
+            x = bounds[0];
+            y = bounds[1];
+            w = bounds[2];
+            h = bounds[3];
+            
+            h = fabs(y - h);
+            
+            r.x = x;
+            r.y = y+h;
+            r.width = w;
+            r.height = h;
+
+            ofRectangle r2 = r;
 			r2.y -= r2.height;
 			r2.y += size * lineHeight * OFX_FONT_STASH_LINE_HEIGHT_MULT * line;
-			rects.push_back(r2);
-			//ofSetColor(255,32); //debug
-			//ofRect(r2);
+            rects.push_back(r2);
+            
 			line ++;
 		}
 
@@ -355,4 +416,37 @@ ofRectangle ofxFontStash::getBBox( string text, float size, float xx, float yy )
 
 void ofxFontStash::setLineHeight(float percent){
 	lineHeight = percent;
+}
+
+
+bool ofxFontStash::addFontVarient(string fontFile, int varient){
+
+    string fsname = "regular";
+    int stashFontID = 0;
+    
+    if(varient == FS_FONT_BOLD) fsname = "bold";
+    if(varient == FS_FONT_ITALIC) fsname = "italic";
+    
+    stashFontID = fonsAddFont( stash, fsname.c_str(), ofToDataPath( fontFile ).c_str() );
+    
+
+    if ( stashFontID != 0){
+        
+        if(varient == FS_FONT_REGULAR){
+            ofLogNotice("ofxFontStash", "loaded font '%s' for varient regular ", fontFile.c_str() );
+            regularFontID = stashFontID;
+        }else if(varient == FS_FONT_ITALIC){
+            ofLogNotice("ofxFontStash", "loaded font '%s' for varient italic ", fontFile.c_str() );
+            italicFontID = stashFontID;
+        }else if(varient == FS_FONT_BOLD){
+            ofLogNotice("ofxFontStash", "loaded font '%s' for varient bold ", fontFile.c_str() );
+            boldFontID = stashFontID;
+        }
+        return true;
+    
+    }else{
+        ofLogError("ofxFontStash", "Can't load font! '%s'", fontFile.c_str() );
+    
+    }
+    
 }
