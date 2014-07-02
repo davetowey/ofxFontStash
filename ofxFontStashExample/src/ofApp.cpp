@@ -7,7 +7,7 @@ void ofApp::setup(){
 	ofSetFrameRate(60);
 	ofBackground(22, 22, 22, 255);
     
-	font.setup("Inconsolata.otf");
+	font.setup("Vera.ttf"); // TODO: test with otf "Inconsolata.otf"
 }
 
 //--------------------------------------------------------------
@@ -25,7 +25,8 @@ void ofApp::draw(){
 	string demoText = (string)"ofxFontStash can draw multiline text" + "\n" +
     "Here is another line" + "\n";
     
-	font.drawMultiLine( demoText,  fontSize, x, y);
+    ofSetColor(255);
+	font.draw( demoText,  fontSize, x, y);
 }
 
 //--------------------------------------------------------------
