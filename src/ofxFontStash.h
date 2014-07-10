@@ -42,6 +42,10 @@
 
 #include "ofMain.h"
 
+// use the freetype libs to enabled .otf fonts
+#define FONS_USE_FREETYPE
+
+
 #ifdef REQUIRES_OFX_UNICODE
 #include "ofUTF8.h"
 #include "ofTextConverter.h"

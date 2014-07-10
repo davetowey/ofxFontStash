@@ -32,6 +32,7 @@
 
 
 #include <iostream>
+
 #define FONTSTASH_IMPLEMENTATION
 #define GLFONTSTASH_IMPLEMENTATION  // Expands implementation
 

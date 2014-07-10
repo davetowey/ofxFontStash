@@ -7,7 +7,7 @@ void ofApp::setup(){
 	ofSetFrameRate(60);
 	ofBackground(22, 22, 22, 255);
     
-	font.setup("Vera.ttf"); // TODO: test with otf "Inconsolata.otf"
+	font.setup("Inconsolata.otf");//Vera.ttf"); // TODO: test with otf "Inconsolata.otf"
 }
 
 //--------------------------------------------------------------
