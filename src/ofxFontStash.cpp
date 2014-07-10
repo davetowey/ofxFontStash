@@ -156,6 +156,7 @@ void ofxFontStash::drawMultiLine( string text, float size, float x, float y){
 	}		
 }
 
+#ifdef REQUIRES_OFX_UNICODE
 ofRectangle ofxFontStash::drawMultiLineColumn( string & text, float size, float x, float y,
 											  float maxW, int &numLines, bool dontDraw, int maxLines,
 											  bool giveBackNewLinedText, bool* wordsWereTruncated){
@@ -356,6 +357,7 @@ string ofxFontStash::walkAndFill(ofUTF8Ptr begin, ofUTF8Ptr & iter, ofUTF8Ptr en
 	}
 	return finalLine;
 }
+#endif
 
 ofRectangle ofxFontStash::getBBox( string text, float size, float xx, float yy ){
 

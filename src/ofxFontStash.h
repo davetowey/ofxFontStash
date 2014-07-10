@@ -35,11 +35,17 @@
 #ifndef ofxFontStash_h
 #define ofxFontStash_h
 
+// toggle this if we want to use the ofxUnicode dependency
+//#define REQUIRES_OFX_UNICODE
+
 #define OFX_FONT_STASH_LINE_HEIGHT_MULT	0.8
 
 #include "ofMain.h"
+
+#ifdef REQUIRES_OFX_UNICODE
 #include "ofUTF8.h"
 #include "ofTextConverter.h"
+#endif
 
 extern "C" {
 #include "fontstash.h"
@@ -67,6 +73,7 @@ class ofxFontStash{
 		//text with "\n" will produce line breaks
 		void drawMultiLine( string text, float fontSize, float x, float y );
 
+    #ifdef REQUIRES_OFX_UNICODE
 		//fits text in a column of a certain width
 		//if you only want to find out the bbox size, send in dontDraw=true
 		//numLines will return the number of lines this has been split in
@@ -74,6 +81,10 @@ class ofxFontStash{
 											float columnWidth, int &numLines, bool dontDraw = false,
 											int maxLines = 0, bool giveBackNewLinedText = false,
 											bool * wordsWereTruncated = NULL );
+    
+        //fill in a string
+        string walkAndFill(ofUTF8Ptr being, ofUTF8Ptr & iter, ofUTF8Ptr end);
+    #endif
 
 		//if the text has newlines, it will be treated as if was called into drawMultiLine()
 		ofRectangle getBBox( string text, float size, float x, float y );
@@ -105,8 +116,6 @@ private:
         //bool				batchDrawing;
         unsigned int        color;
 
-		//fill in a string
-		string walkAndFill(ofUTF8Ptr being, ofUTF8Ptr & iter, ofUTF8Ptr end);
 };
 
 
