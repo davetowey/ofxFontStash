@@ -7,7 +7,8 @@ void ofApp::setup(){
 	ofSetFrameRate(60);
 	ofBackground(22, 22, 22, 255);
     
-	font.setup("Inconsolata.otf");//Vera.ttf"); // TODO: test with otf "Inconsolata.otf"
+	font.setup("Inconsolata.otf"); // TODO: test with otf "Inconsolata.otf"
+
 }
 
 //--------------------------------------------------------------
@@ -31,7 +32,10 @@ void ofApp::draw(){
 	//font.draw( demoText,  fontSize, x, y);
     font.drawMultiLine( demoText,  fontSize, x, y);
     
+    // TODO: method to break up text like the LWTextLayer stuff
     font.drawMultiLine( longText,  fontSize*.5, x, 200);
+    
+    
 }
 
 //--------------------------------------------------------------

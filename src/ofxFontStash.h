@@ -35,16 +35,15 @@
 #ifndef ofxFontStash_h
 #define ofxFontStash_h
 
-// toggle this if we want to use the ofxUnicode dependency
-//#define REQUIRES_OFX_UNICODE
-
-#define OFX_FONT_STASH_LINE_HEIGHT_MULT	0.8
 
 #include "ofMain.h"
 
-// use the freetype libs to enabled .otf fonts
+// use the freetype libs to enabled .otf and .ttf fonts.
+// if only .ttf required, stick with stb lib - look slightly better.
 #define FONS_USE_FREETYPE
 
+// toggle this if we want to use the ofxUnicode dependency
+//#define REQUIRES_OFX_UNICODE
 
 #ifdef REQUIRES_OFX_UNICODE
 #include "ofUTF8.h"
@@ -57,6 +56,7 @@ extern "C" {
 #include "glfontstash.h"
 }
 
+#define OFX_FONT_STASH_LINE_HEIGHT_MULT	0.8
 #define FS_FONT_REGULAR 0
 #define FS_FONT_ITALIC 1
 #define FS_FONT_BOLD 2

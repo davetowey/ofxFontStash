@@ -161,8 +161,23 @@ int fons__tt_loadFont(struct FONScontext *context, struct FONSttFontImpl *font, 
 
 	//font->font.userdata = stash;
 	ftError = FT_New_Memory_Face(ftLibrary, (const FT_Byte*)data, dataSize, 0, &font->font);
-	return ftError == 0;
+    //cout << "FT Is it failing here? " << ftError;
+	//return ftError == 0;
+    return ftError;
 }
+/*
+ int fons__tt_loadFont(struct FONScontext *context, struct FONSttFontImpl *font, unsigned char *data, int dataSize)
+ {
+ 
+ int stbError;
+ FONS_NOTUSED(dataSize);
+ 
+ font->font.userdata = context;
+ stbError = stbtt_InitFont(&font->font, data, 0);
+ 
+ return stbError;
+ }
+ */
 
 void fons__tt_getFontVMetrics(struct FONSttFontImpl *font, int *ascent, int *descent, int *lineGap)
 {
@@ -246,13 +261,16 @@ int fons__tt_init(struct FONScontext *context)
 	return 1;
 }
 
+
 int fons__tt_loadFont(struct FONScontext *context, struct FONSttFontImpl *font, unsigned char *data, int dataSize)
 {
+    
 	int stbError;
 	FONS_NOTUSED(dataSize);
 
 	font->font.userdata = context;
 	stbError = stbtt_InitFont(&font->font, data, 0);
+    //cout << "STB Is it failing here? " << stbError;
 	return stbError;
 }
 
@@ -687,7 +705,10 @@ struct FONScontext* fonsCreateInternal(struct FONSparams* params)
 	if (stash->scratch == NULL) goto error;
 
 	// Initialize implementation library
-	if (!fons__tt_init(stash)) goto error;
+	if (!fons__tt_init(stash)) {
+        
+        goto error;
+    }
 
 	if (stash->params.renderCreate != NULL) {
 		if (stash->params.renderCreate(stash->params.userPtr, stash->params.width, stash->params.height) == 0)
@@ -850,6 +871,7 @@ int fonsAddFont(struct FONScontext* stash, const char* name, const char* path)
 	fclose(fp);
 	fp = 0;
 
+    
 	return fonsAddFontMem(stash, name, data, dataSize, 1);
 
 error:
@@ -866,6 +888,7 @@ int fonsAddFontMem(struct FONScontext* stash, const char* name, unsigned char* d
 	int idx = fons__allocFont(stash);
 	if (idx == FONS_INVALID)
 		return FONS_INVALID;
+    
 
 	font = stash->fonts[idx];
 
@@ -883,8 +906,20 @@ int fonsAddFontMem(struct FONScontext* stash, const char* name, unsigned char* d
 
 	// Init font
 	stash->nscratch = 0;
-	if (!fons__tt_loadFont(stash, &font->font, data, dataSize)) goto error;
-
+    //if (!fons__tt_loadFont(stash, &font->font, data, dataSize)) goto error;
+	int fontLoaded = fons__tt_loadFont(stash, &font->font, data, dataSize);
+    if(fontLoaded == 0) {
+        
+        // so an OTF font will fail here when in STB mode        
+        
+        // font loaded - don't know why this is an error for stb but still works?
+        // for freetype it's the opposite
+        #ifndef FONS_USE_FREETYPE
+        goto error;
+        #endif
+        
+    }
+    
 	// Store normalized line height. The real line height is got
 	// by multiplying the lineh by font size.
 	fons__tt_getFontVMetrics( &font->font, &ascent, &descent, &lineGap);
@@ -893,8 +928,7 @@ int fonsAddFontMem(struct FONScontext* stash, const char* name, unsigned char* d
 	font->descender = (float)descent / (float)fh;
 	font->lineh = (float)(fh + lineGap) / (float)fh;
 
-	return idx;
-
+    return idx;
 error:
 	fons__freeFont(font);
 	stash->nfonts--;

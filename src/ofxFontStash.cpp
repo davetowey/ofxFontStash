@@ -84,7 +84,7 @@ bool ofxFontStash::setup( string fontFile, float lineHeightPercent , int texDime
 		texDimension = ofNextPow2(texDimension);
 		stash = glfonsCreate(texDimension,texDimension,FONS_ZERO_TOPLEFT);
 		regularFontID = fonsAddFont( stash, "regular", ofToDataPath( fontFile ).c_str() );
-        if ( regularFontID != 0){
+        if ( regularFontID != -1){
 			ofLogNotice("ofxFontStash", "loaded font '%s' in texture (%d x %d)", fontFile.c_str(), texDimension, texDimension );
 			return true;
 		}else{
