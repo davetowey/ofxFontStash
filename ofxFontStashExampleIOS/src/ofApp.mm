@@ -34,6 +34,7 @@ void ofApp::update(){
 void ofApp::draw(){
 	
     ofSetColor(255);
+    ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate()), 20, 20);
     
     float x = 20;
     float y = 60;

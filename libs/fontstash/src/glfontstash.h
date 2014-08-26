@@ -79,8 +79,18 @@ static void glfons__renderUpdate(void* userPtr, int* rect, const unsigned char* 
     
     #else
     
-    // TODO: opengl replacement draw
-    // not sure what the opengl es equivalents are for GL_CLIENT_PIXEL_STORE_BIT, GL_UNPACK_ROW_LENGTH, GL_UNPACK_SKIP_PIXELS, GL_UNPACK_SKIP_ROWS
+    // http://stackoverflow.com/questions/205522/opengl-subtexturing/205569#205569
+    // http://stackoverflow.com/questions/25424558/opengl-es-updating-a-sub-part-of-a-texture-without-using-glpixelstorei?lq=1
+    // FIXME: this is a bit too slow
+    glBindTexture(GL_TEXTURE_2D, gl->tex);
+    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    //glTexSubImage2D(GL_TEXTURE_2D, 0, rect[0], rect[1], w, h, GL_ALPHA, GL_UNSIGNED_BYTE, data);
+    
+    int y = 0;
+    for(y = 0; y < h; y++) {
+        const unsigned char *row = data + ((y + rect[1])*gl->width + rect[0]);// * 4;
+        glTexSubImage2D(GL_TEXTURE_2D, 0, rect[0], rect[1] + y, w, 1, GL_ALPHA, GL_UNSIGNED_BYTE, row);
+    }
     
     #endif
 }
