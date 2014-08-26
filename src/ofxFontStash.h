@@ -52,7 +52,7 @@
 
 extern "C" {
 #include "fontstash.h"
-#include <GLFW/glfw3.h>             // Or any other GL header of your choice.
+//#include <GLFW/glfw3.h> // Or any other GL header of your choice.
 #include "glfontstash.h"
 }
 

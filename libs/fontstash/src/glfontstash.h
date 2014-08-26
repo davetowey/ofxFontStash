@@ -56,6 +56,7 @@ static int glfons__renderResize(void* userPtr, int width, int height)
 	return glfons__renderCreate(userPtr, width, height);
 }
 
+
 static void glfons__renderUpdate(void* userPtr, int* rect, const unsigned char* data)
 {
 	struct GLFONScontext* gl = (struct GLFONScontext*)userPtr;
@@ -63,6 +64,10 @@ static void glfons__renderUpdate(void* userPtr, int* rect, const unsigned char* 
 	int h = rect[3] - rect[1];
 
 	if (gl->tex == 0) return;
+    
+    #ifndef TARGET_OPENGLES
+    
+    // this should work for glfw + glew
 	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
 	glBindTexture(GL_TEXTURE_2D, gl->tex);
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
@@ -71,6 +76,13 @@ static void glfons__renderUpdate(void* userPtr, int* rect, const unsigned char* 
 	glPixelStorei(GL_UNPACK_SKIP_ROWS, rect[1]);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, rect[0], rect[1], w, h, GL_ALPHA,GL_UNSIGNED_BYTE, data);
 	glPopClientAttrib();
+    
+    #else
+    
+    // TODO: opengl replacement draw
+    // not sure what the opengl es equivalents are for GL_CLIENT_PIXEL_STORE_BIT, GL_UNPACK_ROW_LENGTH, GL_UNPACK_SKIP_PIXELS, GL_UNPACK_SKIP_ROWS
+    
+    #endif
 }
 
 static void glfons__renderDraw(void* userPtr, const float* verts, const float* tcoords, const unsigned int* colors, int nverts)

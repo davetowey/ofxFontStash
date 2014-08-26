@@ -5,16 +5,16 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>D921BE99-95B3-4344-96A5-FBC32D45FBF3</string>
+	<string>E504A9CF-6EB2-4A8E-AA3F-E9BB70605EBF</string>
 	<key>IDESourceControlProjectName</key>
-	<string>ofxFontStashExample</string>
+	<string>ofxFontStashExampleIOS</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>23CBFD45-5E0A-4623-B5C3-353F8347B448</key>
 		<string>https://github.com/trentbrooks/openFrameworks.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>addons/ofxFontStash/ofxFontStashExample/ofxFontStashExample.xcodeproj/project.xcworkspace</string>
+	<string>addons/ofxFontStash/ofxFontStashExampleIOS/ofxFontStashExampleIOS.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>23CBFD45-5E0A-4623-B5C3-353F8347B448</key>

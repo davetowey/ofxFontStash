@@ -1,6 +1,5 @@
 #include "ofApp.h"
 
-
 string titleText = "ofxFontStash";
 string longText = "This text needs to be broken down line by line. At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.";
 string wrappedText = "";
@@ -8,7 +7,7 @@ int largeFontSize = 28;
 int smallFontSize = 14;
 
 //--------------------------------------------------------------
-void ofApp::setup(){
+void ofApp::setup(){	
 
     ofEnableAlphaBlending();
 	ofSetFrameRate(60);
@@ -24,7 +23,6 @@ void ofApp::setup(){
     
     int maxTextWidth = 280;
     wrappedText = font.wrapString(longText, smallFontSize, maxTextWidth);
-
 }
 
 //--------------------------------------------------------------
@@ -34,7 +32,7 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    
+	
     ofSetColor(255);
     
     float x = 20;
@@ -54,46 +52,51 @@ void ofApp::draw(){
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key){
+void ofApp::exit(){
 
 }
 
 //--------------------------------------------------------------
-void ofApp::keyReleased(int key){
+void ofApp::touchDown(ofTouchEventArgs & touch){
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
+void ofApp::touchMoved(ofTouchEventArgs & touch){
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
+void ofApp::touchUp(ofTouchEventArgs & touch){
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
+void ofApp::touchDoubleTap(ofTouchEventArgs & touch){
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
+void ofApp::touchCancelled(ofTouchEventArgs & touch){
+    
+}
+
+//--------------------------------------------------------------
+void ofApp::lostFocus(){
 
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
+void ofApp::gotFocus(){
 
 }
 
 //--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
+void ofApp::gotMemoryWarning(){
 
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
+void ofApp::deviceOrientationChanged(int newOrientation){
 
 }
