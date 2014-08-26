@@ -97,7 +97,7 @@ bool ofxFontStash::setup( string fontFile, float lineHeightPercent , int texDime
 }
 
 
-void ofxFontStash::draw( string text, float size, float x, float y){
+void ofxFontStash::draw( string text, float size, float x, float y, int align){
 	
 	if (stash != NULL){
 		float dx = 0;
@@ -112,6 +112,7 @@ void ofxFontStash::draw( string text, float size, float x, float y){
         
         // new stuff
         fonsSetSize(stash, size);
+        fonsSetAlign(stash, align);
         fonsDrawText(stash, 0, 0, text.c_str(), NULL);
         
 		glPopMatrix();
@@ -121,7 +122,7 @@ void ofxFontStash::draw( string text, float size, float x, float y){
 }
 
 
-void ofxFontStash::drawMultiLine( string text, float size, float x, float y){
+void ofxFontStash::drawMultiLine( string text, float size, float x, float y, int align){
 	
 	if (stash != NULL){
 
@@ -129,6 +130,7 @@ void ofxFontStash::drawMultiLine( string text, float size, float x, float y){
 			glTranslatef(x, y, 0.0f);
             //	sth_begin_draw(stash);
             fonsSetSize(stash, size);
+            fonsSetAlign(stash, align);
         
             float currentColor[4];
             glGetFloatv(GL_CURRENT_COLOR,currentColor);
@@ -155,6 +157,41 @@ void ofxFontStash::drawMultiLine( string text, float size, float x, float y){
 	}else{
 		ofLogError("ofxFontStash", "can't drawMultiLine() without having been setup first!");
 	}		
+}
+
+string ofxFontStash::wrapString(string text, float size, int maxWidth) {
+    
+    string typeWrapped = "";
+    string tempString = "";
+    vector <string> words = ofSplitString(text, " ");
+    int stringwidth = 0;
+    
+    for(int i = 0; i < words.size(); i++) {
+        
+        string wrd = words[i];
+        
+        // if we aren't on the first word, add a space
+        if (i > 0) {
+            tempString += " ";
+        }
+        tempString += wrd;
+        
+        // get the width of the current word
+        stringwidth = getBBox( tempString, size, 0,0 ).width;
+        
+        // add new lines
+        if(stringwidth >= maxWidth) {
+            typeWrapped += "\n";
+            tempString = wrd;		// make sure we're including the extra word on the next line
+        } else if (i > 0) {
+            // if we aren't on the first word, add a space
+            typeWrapped += " ";
+        }
+        
+        typeWrapped += wrd;
+    }
+    
+    return typeWrapped;
 }
 
 #ifdef REQUIRES_OFX_UNICODE

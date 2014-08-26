@@ -40,7 +40,7 @@
 
 // use the freetype libs to enabled .otf and .ttf fonts.
 // if only .ttf required, stick with stb lib - look slightly better.
-#define FONS_USE_FREETYPE
+//#define FONS_USE_FREETYPE
 
 // toggle this if we want to use the ofxUnicode dependency
 //#define REQUIRES_OFX_UNICODE
@@ -72,10 +72,18 @@ class ofxFontStash{
 		bool setup( string fontFile, float lineHeightPercent = 1.0f, int textureDimension = 512);
 
 		//will draw text in one line, ignoring "\n"'s
-		void draw( string text, float size, float x, float y);
+        // added alignment as last parameter- accepts FONS_ALIGN_LEFT, FONS_ALIGN_CENTER, FONS_ALIGN_RIGHT
+		void draw( string text, float size, float x, float y, int align = FONS_ALIGN_LEFT);
 
 		//text with "\n" will produce line breaks
-		void drawMultiLine( string text, float fontSize, float x, float y );
+		void drawMultiLine( string text, float fontSize, float x, float y, int align = FONS_ALIGN_LEFT);
+    
+        // without unicode dependancy
+        ofRectangle drawMultiLineColumn(string &text, float fontSize, float x, float y, float columnWidth);
+    
+        // break up the string with new lines at maxWidth (for replacement of drawMultiLineColumn)
+        // and to be used with drawMultiLine()
+        string wrapString(string text, float size, int maxWidth);
 
     #ifdef REQUIRES_OFX_UNICODE
 		//fits text in a column of a certain width
