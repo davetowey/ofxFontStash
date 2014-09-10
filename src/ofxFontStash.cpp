@@ -62,6 +62,17 @@ unsigned int gltohex(float *c)
     
 }
 
+// http://stackoverflow.com/questions/14375156/how-to-convert-a-rgb-color-value-to-an-hexadecimal-value-in-c
+// http://stackoverflow.com/questions/2534116/how-to-convert-get-rgbx-y-integer-pixel-to-colorr-g-b-a-in-java
+unsigned int gltohex(ofColor& clr) {
+    
+    //return (((unsigned char)clr.r & 0xff) << 24) + (((unsigned char)clr.g & 0xff) << 16) + (((unsigned char)clr.b & 0xff) << 8)+ ((unsigned char)clr.a & 0xff);
+    
+    // needs to be ARGB not RGBA
+    //return ((clr.r & 0xff) << 24) + ((clr.g & 0xff) << 16) + ((clr.b & 0xff) << 8) + (clr.a & 0xff);
+    return ((clr.a & 0xff) << 24) + (clr.r & 0xff) + ((clr.g & 0xff) << 8) + ((clr.b & 0xff) << 16);
+}
+
 /* *********************************************************************** */
 
 ofxFontStash::ofxFontStash(){
@@ -100,12 +111,12 @@ bool ofxFontStash::setup( string fontFile, float lineHeightPercent , int texDime
 void ofxFontStash::draw( string text, float size, float x, float y, int align){
 	
 	if (stash != NULL){
-		float dx = 0;
 		
-		glPushMatrix();
-		glTranslatef(x, y, 0.0);
-
+        ofPushMatrix();
+        ofTranslate(x,y);
+        
         // old stuff
+        // float dx = 0;
         //		sth_begin_draw(stash);
         //		sth_draw_text( stash, stashFontID, size, 0, 0 , text.c_str(), &dx ); //this might draw
         //		sth_end_draw(stash); // this actually draws
@@ -113,9 +124,12 @@ void ofxFontStash::draw( string text, float size, float x, float y, int align){
         // new stuff
         fonsSetSize(stash, size);
         fonsSetAlign(stash, align);
+        ofColor glColor = ofGetStyle().color;        
+        fonsSetColor(stash, gltohex(glColor));
         fonsDrawText(stash, 0, 0, text.c_str(), NULL);
         
-		glPopMatrix();
+        ofPopMatrix();
+
 	}else{
 		ofLogError("ofxFontStash", "can't draw() without having been setup first!");
 	}		
@@ -126,33 +140,32 @@ void ofxFontStash::drawMultiLine( string text, float size, float x, float y, int
 	
 	if (stash != NULL){
 
-		glPushMatrix();
-			glTranslatef(x, y, 0.0f);
-            //	sth_begin_draw(stash);
-            fonsSetSize(stash, size);
-            fonsSetAlign(stash, align);
+        ofPushMatrix();
+        ofTranslate(x,y);
+        //	sth_begin_draw(stash);
         
-            float currentColor[4];
-            glGetFloatv(GL_CURRENT_COLOR,currentColor);
+        fonsSetSize(stash, size);
+        fonsSetAlign(stash, align);
+        ofColor glColor = ofGetStyle().color;
+        fonsSetColor(stash, gltohex(glColor));
+
+    
+        stringstream ss(text);
+        string s;
+        int line = 0;
+        while ( getline(ss, s, '\n') ) {
+            //cout << s << endl;
+            //float dx = 0;
+            // old fs
+            //		sth_draw_text( stash, stashFontID, size, 0.0f, size * lineHeight * OFX_FONT_STASH_LINE_HEIGHT_MULT * line, s.c_str(), &dx );
         
-            fonsSetColor(stash, gltohex(currentColor));
+            // new fs
+            fonsDrawText(stash, 0, size * lineHeight * OFX_FONT_STASH_LINE_HEIGHT_MULT * line, s.c_str(), NULL);
+            line ++;
         
-			stringstream ss(text);
-			string s;
-			int line = 0;
-			while ( getline(ss, s, '\n') ) {
-				//cout << s << endl;
-				float dx = 0;
-                // old fs
-                //		sth_draw_text( stash, stashFontID, size, 0.0f, size * lineHeight * OFX_FONT_STASH_LINE_HEIGHT_MULT * line, s.c_str(), &dx );
-            
-                // new fs
-                fonsDrawText(stash, 0, size * lineHeight * OFX_FONT_STASH_LINE_HEIGHT_MULT * line, s.c_str(), NULL);
-				line ++;
-			
-            }
-		//	sth_end_draw(stash);
-		glPopMatrix();
+        }
+        //	sth_end_draw(stash);
+		ofPopMatrix();
 
 	}else{
 		ofLogError("ofxFontStash", "can't drawMultiLine() without having been setup first!");

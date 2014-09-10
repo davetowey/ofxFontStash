@@ -35,21 +35,25 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    ofSetColor(255);
+    
     
     float x = 20;
     float y = 60;
     
     // draw single line
+    ofSetColor(0,255,255);
 	font.draw( titleText,  largeFontSize, x, y);
     
+    ofSetColor(255);
     // draw multiline text (left aligned)
     font.drawMultiLine( wrappedText,  smallFontSize, x, y + 40, FONS_ALIGN_LEFT);
     
     // centre aligned
+    ofSetColor(255,255,0);
     font.drawMultiLine( wrappedText,  smallFontSize, x + 450, y + 40, FONS_ALIGN_CENTER);
     
     // right aligned
+    ofSetColor(255,128);
     font.drawMultiLine( wrappedText,  smallFontSize, x + 900, y + 40, FONS_ALIGN_RIGHT);
 }
 
