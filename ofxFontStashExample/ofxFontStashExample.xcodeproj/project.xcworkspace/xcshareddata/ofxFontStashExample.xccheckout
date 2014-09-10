@@ -5,36 +5,48 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>D921BE99-95B3-4344-96A5-FBC32D45FBF3</string>
+	<string>9835BCA8-6D14-4402-B12F-F1888F53D7B3</string>
 	<key>IDESourceControlProjectName</key>
 	<string>ofxFontStashExample</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>23CBFD45-5E0A-4623-B5C3-353F8347B448</key>
-		<string>https://github.com/trentbrooks/openFrameworks.git</string>
+		<key>287E05A9-4DAF-434F-989D-03E6452E2898</key>
+		<string>ssh://github.com/davetowey/ofxFontStash.git</string>
+		<key>DCFAB8A0-C38E-4361-9D58-6E134040DD55</key>
+		<string>https://github.com/prisonerjohn/openFrameworks.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>addons/ofxFontStash/ofxFontStashExample/ofxFontStashExample.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>23CBFD45-5E0A-4623-B5C3-353F8347B448</key>
+		<key>287E05A9-4DAF-434F-989D-03E6452E2898</key>
+		<string>../../..</string>
+		<key>DCFAB8A0-C38E-4361-9D58-6E134040DD55</key>
 		<string>../../../../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/trentbrooks/openFrameworks.git</string>
+	<string>ssh://github.com/davetowey/ofxFontStash.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>110</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>23CBFD45-5E0A-4623-B5C3-353F8347B448</string>
+	<string>DCFAB8A0-C38E-4361-9D58-6E134040DD55</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>23CBFD45-5E0A-4623-B5C3-353F8347B448</string>
+			<string>DCFAB8A0-C38E-4361-9D58-6E134040DD55</string>
 			<key>IDESourceControlWCCName</key>
-			<string>openFrameworks</string>
+			<string>OF64</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>287E05A9-4DAF-434F-989D-03E6452E2898</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ofxFontStash</string>
 		</dict>
 	</array>
 </dict>

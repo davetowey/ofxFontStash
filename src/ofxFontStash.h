@@ -45,6 +45,9 @@
 // toggle this if we want to use the ofxUnicode dependency
 //#define REQUIRES_OFX_UNICODE
 
+// toggle this if we want to use the programmable renderer
+//#define TARGET_PROGRAMMABLE_GL
+
 #ifdef REQUIRES_OFX_UNICODE
 #include "ofUTF8.h"
 #include "ofTextConverter.h"
@@ -65,6 +68,7 @@ class ofxFontStash{
 
 	public:
 		
+
 		ofxFontStash();
 		~ofxFontStash();
 	
@@ -113,6 +117,7 @@ class ofxFontStash{
 
 		void setLineHeight(float percent);
         void setColor(ofColor color);
+
 	
 private:
 		
@@ -127,6 +132,12 @@ private:
 
         //bool				batchDrawing;
         unsigned int        color;
+    
+    #ifdef TARGET_PROGRAMMABLE_GL
+    
+        ofShader fsShader;
+    
+    #endif
 
 };
 

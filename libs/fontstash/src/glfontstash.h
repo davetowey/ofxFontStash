@@ -30,6 +30,9 @@ unsigned int glfonsRGBA(unsigned char r, unsigned char g, unsigned char b, unsig
 struct GLFONScontext {
 	GLuint tex;
 	int width, height;
+#ifdef TARGET_PROGRAMMABLE_GL
+    ofVboMesh* mesh;
+#endif
 };
 
 static int glfons__renderCreate(void* userPtr, int width, int height)
@@ -45,8 +48,26 @@ static int glfons__renderCreate(void* userPtr, int width, int height)
 	gl->width = width;
 	gl->height = height;
 	glBindTexture(GL_TEXTURE_2D, gl->tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, gl->width, gl->height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    
+#ifdef TARGET_PROGRAMMABLE_GL
+    
+    if(gl->mesh != NULL){
+        
+        delete(gl->mesh);
+        gl->mesh = NULL;
+        
+    }
+    
+    gl->mesh = new ofVboMesh();
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, gl->width, gl->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    
+#else
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, gl->width, gl->height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, 0);
+#endif
+
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	return 1;
 }
 
@@ -65,19 +86,7 @@ static void glfons__renderUpdate(void* userPtr, int* rect, const unsigned char* 
 
 	if (gl->tex == 0) return;
     
-    #ifndef TARGET_OPENGLES
-    
-    // this should work for glfw + glew
-	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-	glBindTexture(GL_TEXTURE_2D, gl->tex);
-	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-	glPixelStorei(GL_UNPACK_ROW_LENGTH, gl->width);
-	glPixelStorei(GL_UNPACK_SKIP_PIXELS, rect[0]);
-	glPixelStorei(GL_UNPACK_SKIP_ROWS, rect[1]);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, rect[0], rect[1], w, h, GL_ALPHA,GL_UNSIGNED_BYTE, data);
-	glPopClientAttrib();
-    
-    #else
+    #ifdef TARGET_OPENGLES
     
     // http://stackoverflow.com/questions/205522/opengl-subtexturing/205569#205569
     // http://stackoverflow.com/questions/25424558/opengl-es-updating-a-sub-part-of-a-texture-without-using-glpixelstorei?lq=1
@@ -92,29 +101,111 @@ static void glfons__renderUpdate(void* userPtr, int* rect, const unsigned char* 
         glTexSubImage2D(GL_TEXTURE_2D, 0, rect[0], rect[1] + y, w, 1, GL_ALPHA, GL_UNSIGNED_BYTE, row);
     }
     
+    #else
+    
+    #ifdef TARGET_PROGRAMMABLE_GL
+    
+    // http://stackoverflow.com/questions/205522/opengl-subtexturing/205569#205569
+    // http://stackoverflow.com/questions/25424558/opengl-es-updating-a-sub-part-of-a-texture-without-using-glpixelstorei?lq=1
+    // FIXME: this is a bit too slow
+    glBindTexture(GL_TEXTURE_2D, gl->tex);
+    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    //glTexSubImage2D(GL_TEXTURE_2D, 0, rect[0], rect[1], w, h, GL_ALPHA, GL_UNSIGNED_BYTE, data);
+    
+    int y = 0;
+    for(y = 0; y < h; y++) {
+        const unsigned char *row = data + ((y + rect[1])*gl->width + rect[0]);// * 4;
+        glTexSubImage2D(GL_TEXTURE_2D, 0, rect[0], rect[1] + y, w, 1, GL_RED, GL_UNSIGNED_BYTE, row);
+    }
+    
+    #else
+    
+    // this should work for glfw + glew
+	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+	glBindTexture(GL_TEXTURE_2D, gl->tex);
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, gl->width);
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS, rect[0]);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS, rect[1]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, rect[0], rect[1], w, h, GL_ALPHA,GL_UNSIGNED_BYTE, data);
+	glPopClientAttrib();
+
+    
     #endif
+    #endif
+}
+
+void hextofloat(int c, float *f)
+{
+    
+    
+    f[3] = ((c >> 24) & 0xFF) / 255.0;  // Extract the RR byte
+    f[2] = ((c >> 16) & 0xFF) / 255.0;   // Extract the GG byte
+    f[1] = ((c >> 8) & 0xFF) / 255.0;        // Extract the BB byte
+    f[0] = (c & 0xFF) / 255.0;        // Extract the BB byte
+    
+    
 }
 
 static void glfons__renderDraw(void* userPtr, const float* verts, const float* tcoords, const unsigned int* colors, int nverts)
 {
-	struct GLFONScontext* gl = (struct GLFONScontext*)userPtr;
+    
+#ifdef TARGET_PROGRAMMABLE_GL
+    
+    struct GLFONScontext* gl = (struct GLFONScontext*)userPtr;
+    if (gl->tex == 0) return;
+	
+    gl->mesh->setMode(OF_PRIMITIVE_TRIANGLES);
+
+    ofSetColor(255,255,255,255);
+    gl->mesh->clear();
+    
+    for(int i = 0; i < nverts; i++){
+        
+        gl->mesh->addVertex(ofVec3f(verts[i*2], verts[i*2+1], 0));
+        gl->mesh->addTexCoord(ofVec2f(tcoords[i*2],tcoords[i*2+1]));
+        
+        float f[4];
+        hextofloat(colors[i], f);
+        gl->mesh->addColor(ofFloatColor(f[0], f[1],f[2],f[3]));
+        
+        
+    }
+    
+  
+    glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, gl->tex);
+	
+    gl->mesh->draw(OF_MESH_FILL);
+    
+    
+    
+	glDisable(GL_TEXTURE_2D);
+    
+#else
+    
+    struct GLFONScontext* gl = (struct GLFONScontext*)userPtr;
 	if (gl->tex == 0) return;
 	glBindTexture(GL_TEXTURE_2D, gl->tex);
 	glEnable(GL_TEXTURE_2D);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
-
+    
 	glVertexPointer(2, GL_FLOAT, sizeof(float)*2, verts);
 	glTexCoordPointer(2, GL_FLOAT, sizeof(float)*2, tcoords);
 	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(unsigned int), colors);
-
+    
 	glDrawArrays(GL_TRIANGLES, 0, nverts);
-
+    
 	glDisable(GL_TEXTURE_2D);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
+    
+#endif
+    
+    
 }
 
 static void glfons__renderDelete(void* userPtr)

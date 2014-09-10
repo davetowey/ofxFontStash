@@ -37,6 +37,7 @@
 #define GLFONTSTASH_IMPLEMENTATION  // Expands implementation
 
 
+
 #include "ofxFontStash.h"
 
 std::string searchAndReplace(std::string &s,
@@ -82,6 +83,11 @@ ofxFontStash::ofxFontStash(){
 	lineHeight = 1.0f;
 	stash = NULL;
 	//batchDrawing = false;
+
+#ifdef TARGET_PROGRAMMABLE_GL
+    fsShader.load("shaders/fs_vert.glsl", "shaders/fs_frag.glsl");
+#endif
+
 }
 
 ofxFontStash::~ofxFontStash(){
@@ -112,6 +118,20 @@ void ofxFontStash::draw( string text, float size, float x, float y, int align){
 	
 	if (stash != NULL){
 		
+#ifdef TARGET_PROGRAMMABLE_GL
+        
+        fsShader.begin();
+        
+        int mvp = glGetUniformLocation(fsShader.getProgram(), "mvp");
+        
+        ofMatrix4x4 m1 =ofGetCurrentMatrix(OF_MATRIX_PROJECTION);
+        ofMatrix4x4 m2 =ofGetCurrentMatrix(OF_MATRIX_MODELVIEW);
+        ofMatrix4x4 m3 = m2*m1;
+        
+        glUniformMatrix4fv(mvp,  1, false, m3.getPtr());
+        
+#endif
+
         ofPushMatrix();
         ofTranslate(x,y);
         
@@ -128,6 +148,12 @@ void ofxFontStash::draw( string text, float size, float x, float y, int align){
         fonsSetColor(stash, gltohex(glColor));
         fonsDrawText(stash, 0, 0, text.c_str(), NULL);
         
+        
+#ifdef TARGET_PROGRAMMABLE_GL
+        
+        fsShader.end();
+        
+#endif
         ofPopMatrix();
 
 	}else{
@@ -148,7 +174,20 @@ void ofxFontStash::drawMultiLine( string text, float size, float x, float y, int
         fonsSetAlign(stash, align);
         ofColor glColor = ofGetStyle().color;
         fonsSetColor(stash, gltohex(glColor));
-
+        
+        #ifdef TARGET_PROGRAMMABLE_GL
+        
+        fsShader.begin();
+        
+        int mvp = glGetUniformLocation(fsShader.getProgram(), "mvp");
+        
+        ofMatrix4x4 m1 =ofGetCurrentMatrix(OF_MATRIX_PROJECTION);
+        ofMatrix4x4 m2 =ofGetCurrentMatrix(OF_MATRIX_MODELVIEW);
+        ofMatrix4x4 m3 = m2*m1;
+        
+        glUniformMatrix4fv(mvp,  1, false, m3.getPtr());
+        
+        #endif
     
         stringstream ss(text);
         string s;
@@ -163,7 +202,14 @@ void ofxFontStash::drawMultiLine( string text, float size, float x, float y, int
             fonsDrawText(stash, 0, size * lineHeight * OFX_FONT_STASH_LINE_HEIGHT_MULT * line, s.c_str(), NULL);
             line ++;
         
+        
         }
+        
+        #ifdef TARGET_PROGRAMMABLE_GL
+        
+        fsShader.end();
+        
+        #endif
         //	sth_end_draw(stash);
 		ofPopMatrix();
 
