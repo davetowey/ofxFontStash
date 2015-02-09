@@ -211,6 +211,12 @@ static void glfons__renderDraw(void* userPtr, const float* verts, const float* t
 static void glfons__renderDelete(void* userPtr)
 {
 	struct GLFONScontext* gl = (struct GLFONScontext*)userPtr;
+#ifdef TARGET_PROGRAMMABLE_GL
+    if(gl->mesh != NULL) {
+        delete gl->mesh;
+        gl->mesh = NULL;
+    }
+#endif
 	if (gl->tex != 0)
 		glDeleteTextures(1, &gl->tex);
 	gl->tex = 0;
